@@ -52,7 +52,7 @@ public final class JwtTimestampValidator implements OAuth2TokenValidator<Jwt> {
 
 	private static final Duration DEFAULT_MAX_CLOCK_SKEW = Duration.of(60, ChronoUnit.SECONDS);
 
-	private final boolean required;
+	private boolean allowEmpty;
 
 	private final Duration clockSkew;
 
@@ -62,21 +62,21 @@ public final class JwtTimestampValidator implements OAuth2TokenValidator<Jwt> {
 	 * A basic instance with no custom verification and the default max clock skew
 	 */
 	public JwtTimestampValidator() {
-		this(DEFAULT_MAX_CLOCK_SKEW, false);
-	}
-
-	public JwtTimestampValidator(boolean required) {
-		this(DEFAULT_MAX_CLOCK_SKEW, required);
+		this(DEFAULT_MAX_CLOCK_SKEW);
 	}
 
 	public JwtTimestampValidator(Duration clockSkew) {
-		this(clockSkew, false);
+		Assert.notNull(clockSkew, "clockSkew cannot be null");
+		this.allowEmpty = true;
+		this.clockSkew = clockSkew;
 	}
 
-	public JwtTimestampValidator(Duration clockSkew, boolean required) {
-		Assert.notNull(clockSkew, "clockSkew cannot be null");
-		this.required = required;
-		this.clockSkew = clockSkew;
+	/**
+	 * Whether to allow the {@code exp} or {@code nbf} header to be empty. The default value is
+	 * {@code true}
+	 */
+	public void setAllowEmpty(boolean allowEmpty) {
+		this.allowEmpty = allowEmpty;
 	}
 
 	@Override
@@ -84,7 +84,7 @@ public final class JwtTimestampValidator implements OAuth2TokenValidator<Jwt> {
 		Assert.notNull(jwt, "jwt cannot be null");
 		Instant expiry = jwt.getExpiresAt();
 		Instant notBefore = jwt.getNotBefore();
-		if (this.required && !(expiry != null || notBefore != null)) {
+		if (!this.allowEmpty && !(expiry != null || notBefore != null)) {
 			OAuth2Error oAuth2Error = createOAuth2Error("exp and nbf are required");
 			return OAuth2TokenValidatorResult.failure(oAuth2Error);
 		}

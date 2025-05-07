@@ -128,7 +128,7 @@ public class JwtTimestampValidatorTests {
 	}
 
 	@Test
-	public void validateWhenDefaultRequiredAndNeitherExpiryNorNotBeforeIsSpecifiedThenReturnsSuccessfulResult() {
+	public void validateWhenAllowEmptyDefaultAndNeitherExpiryNorNotBeforeIsSpecifiedThenReturnsSuccessfulResult() {
 		Jwt jwt = TestJwts.jwt().claims((c) -> {
 			c.remove(JwtClaimNames.EXP);
 			c.remove(JwtClaimNames.NBF);
@@ -138,83 +138,56 @@ public class JwtTimestampValidatorTests {
 	}
 
 	@Test
-	public void validateWhenNotRequiredAndNeitherExpiryNorNotBeforeIsSpecifiedThenReturnsSuccessfulResult() {
+	public void validateWhenAllowEmptyFalseAndNeitherExpiryNorNotBeforeIsSpecifiedThenReturnsSuccessfulResult() {
 		Jwt jwt = TestJwts.jwt().claims((c) -> {
 			c.remove(JwtClaimNames.EXP);
 			c.remove(JwtClaimNames.NBF);
 		}).build();
-		JwtTimestampValidator jwtValidator = new JwtTimestampValidator(false);
-		assertThat(jwtValidator.validate(jwt).hasErrors()).isFalse();
-	}
-
-	@Test
-	public void validateWhenRequiredAndNoExpiryIsSpecifiedThenReturnsSuccessfulResult() {
-		Jwt jwt = TestJwts.jwt().claims((c) -> c.remove(JwtClaimNames.EXP)).build();
-		JwtTimestampValidator jwtValidator = new JwtTimestampValidator(true);
-		assertThat(jwtValidator.validate(jwt).hasErrors()).isFalse();
-	}
-
-	@Test
-	public void validateWhenRequiredAndNoNotBeforeIsSpecifiedThenReturnsSuccessfulResult() {
-		Jwt jwt = TestJwts.jwt().claims((c) -> c.remove(JwtClaimNames.NBF)).build();
-		JwtTimestampValidator jwtValidator = new JwtTimestampValidator(true);
-		assertThat(jwtValidator.validate(jwt).hasErrors()).isFalse();
-	}
-
-	@Test
-	public void validateWhenRequiredAndNeitherExpiryNorNotBeforeIsSpecifiedThenReturnsSuccessfulResult() {
-		Jwt jwt = TestJwts.jwt().claims((c) -> {
-			c.remove(JwtClaimNames.EXP);
-			c.remove(JwtClaimNames.NBF);
-		}).build();
-		JwtTimestampValidator jwtValidator = new JwtTimestampValidator(true);
+		JwtTimestampValidator jwtValidator = new JwtTimestampValidator();
+		jwtValidator.setAllowEmpty(false);
 		assertThat(jwtValidator.validate(jwt).hasErrors()).isTrue();
 	}
 
 	@Test
-	public void validateWhenDefaultAndRequiredNotBeforeIsValidAndExpiryIsNotSpecifiedThenReturnsSuccessfulResult() {
+	public void validateWhenAllowEmptyFalseAndNoNotBeforeIsSpecifiedThenReturnsSuccessfulResult() {
+		Jwt jwt = TestJwts.jwt().claims((c) -> c.remove(JwtClaimNames.NBF)).build();
+		JwtTimestampValidator jwtValidator = new JwtTimestampValidator();
+		jwtValidator.setAllowEmpty(false);
+		assertThat(jwtValidator.validate(jwt).hasErrors()).isFalse();
+	}
+
+	@Test
+	public void validateWhenAllowEmptyDefaultAndNotBeforeIsValidAndExpiryIsNotSpecifiedThenReturnsSuccessfulResult() {
 		Jwt jwt = TestJwts.jwt().claims((c) -> c.remove(JwtClaimNames.EXP)).notBefore(Instant.MIN).build();
 		JwtTimestampValidator jwtValidator = new JwtTimestampValidator();
 		assertThat(jwtValidator.validate(jwt).hasErrors()).isFalse();
 	}
 
 	@Test
-	public void validateWhenNotRequiredAndNotBeforeIsValidAndExpiryIsNotSpecifiedThenReturnsSuccessfulResult() {
+	public void validateWhenAllowEmptyFalseAndNotBeforeIsValidAndExpiryIsNotSpecifiedThenReturnsSuccessfulResult() {
 		Jwt jwt = TestJwts.jwt().claims((c) -> c.remove(JwtClaimNames.EXP)).notBefore(Instant.MIN).build();
-		JwtTimestampValidator jwtValidator = new JwtTimestampValidator(false);
+		JwtTimestampValidator jwtValidator = new JwtTimestampValidator();
+		jwtValidator.setAllowEmpty(false);
 		assertThat(jwtValidator.validate(jwt).hasErrors()).isFalse();
 	}
 
 	@Test
-	public void validateWhenRequiredAndNotBeforeIsValidAndExpiryIsNotSpecifiedThenReturnsSuccessfulResult() {
-		Jwt jwt = TestJwts.jwt().claims((c) -> c.remove(JwtClaimNames.EXP)).notBefore(Instant.MIN).build();
-		JwtTimestampValidator jwtValidator = new JwtTimestampValidator(true);
-		assertThat(jwtValidator.validate(jwt).hasErrors()).isFalse();
-	}
-
-	@Test
-	public void validateWhenDefaultAndRequiredExpiryIsValidAndNotBeforeIsNotSpecifiedThenReturnsSuccessfulResult() {
+	public void validateWhenAllowEmptyDefaultAndExpiryIsValidAndNotBeforeIsNotSpecifiedThenReturnsSuccessfulResult() {
 		Jwt jwt = TestJwts.jwt().build();
 		JwtTimestampValidator jwtValidator = new JwtTimestampValidator();
 		assertThat(jwtValidator.validate(jwt).hasErrors()).isFalse();
 	}
 
 	@Test
-	public void validateWhenNotRequiredAndExpiryIsValidAndNotBeforeIsNotSpecifiedThenReturnsSuccessfulResult() {
+	public void validateWhenAllowEmptyFalseAndExpiryIsValidAndNotBeforeIsNotSpecifiedThenReturnsSuccessfulResult() {
 		Jwt jwt = TestJwts.jwt().build();
-		JwtTimestampValidator jwtValidator = new JwtTimestampValidator(false);
+		JwtTimestampValidator jwtValidator = new JwtTimestampValidator();
+		jwtValidator.setAllowEmpty(false);
 		assertThat(jwtValidator.validate(jwt).hasErrors()).isFalse();
 	}
 
 	@Test
-	public void validateWhenRequiredAndExpiryIsValidAndNotBeforeIsNotSpecifiedThenReturnsSuccessfulResult() {
-		Jwt jwt = TestJwts.jwt().build();
-		JwtTimestampValidator jwtValidator = new JwtTimestampValidator(true);
-		assertThat(jwtValidator.validate(jwt).hasErrors()).isFalse();
-	}
-
-	@Test
-	public void validateWhenDefaultRequiredAndBothExpiryAndNotBeforeAreValidThenReturnsSuccessfulResult() {
+	public void validateWhenAllowEmptyDefaultAndBothExpiryAndNotBeforeAreValidThenReturnsSuccessfulResult() {
 		Jwt jwt = TestJwts.jwt().expiresAt(Instant.now(MOCK_NOW)).notBefore(Instant.now(MOCK_NOW)).build();
 		JwtTimestampValidator jwtValidator = new JwtTimestampValidator(Duration.ofNanos(0));
 		jwtValidator.setClock(MOCK_NOW);
@@ -222,17 +195,10 @@ public class JwtTimestampValidatorTests {
 	}
 
 	@Test
-	public void validateWhenNotRequiredAndBothExpiryAndNotBeforeAreValidThenReturnsSuccessfulResult() {
+	public void validateWhenAllowEmptyFalseAndBothExpiryAndNotBeforeAreValidThenReturnsSuccessfulResult() {
 		Jwt jwt = TestJwts.jwt().expiresAt(Instant.now(MOCK_NOW)).notBefore(Instant.now(MOCK_NOW)).build();
-		JwtTimestampValidator jwtValidator = new JwtTimestampValidator(Duration.ofNanos(0), false);
-		jwtValidator.setClock(MOCK_NOW);
-		assertThat(jwtValidator.validate(jwt).hasErrors()).isFalse();
-	}
-
-	@Test
-	public void validateWhenRequiredAndBothExpiryAndNotBeforeAreValidThenReturnsSuccessfulResult() {
-		Jwt jwt = TestJwts.jwt().expiresAt(Instant.now(MOCK_NOW)).notBefore(Instant.now(MOCK_NOW)).build();
-		JwtTimestampValidator jwtValidator = new JwtTimestampValidator(Duration.ofNanos(0), true);
+		JwtTimestampValidator jwtValidator = new JwtTimestampValidator(Duration.ofNanos(0));
+		jwtValidator.setAllowEmpty(false);
 		jwtValidator.setClock(MOCK_NOW);
 		assertThat(jwtValidator.validate(jwt).hasErrors()).isFalse();
 	}

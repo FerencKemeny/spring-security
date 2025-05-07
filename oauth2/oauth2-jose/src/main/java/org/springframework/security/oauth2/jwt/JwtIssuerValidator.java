@@ -30,25 +30,25 @@ public final class JwtIssuerValidator implements OAuth2TokenValidator<Jwt> {
 
 	private final JwtClaimValidator<Object> validator;
 
-	/**
-	 * Constructs a {@link JwtIssuerValidator} using the provided parameters with
-	 * {@link JwtClaimNames#ISS "iss"} claim is REQUIRED
-	 * @param issuer - The issuer that each {@link Jwt} should have.
-	 */
-	public JwtIssuerValidator(String issuer) {
-		this(issuer, true);
-	}
+	private boolean allowEmpty;
 
 	/**
 	 * Constructs a {@link JwtIssuerValidator} using the provided parameters
 	 * @param issuer - The issuer that each {@link Jwt} should have.
-	 * @param required -{@code true} if the {@link JwtClaimNames#ISS "iss"} claim is
-	 * REQUIRED in the {@link Jwt}, {@code false} otherwise
 	 */
-	public JwtIssuerValidator(String issuer, boolean required) {
+	public JwtIssuerValidator(String issuer) {
 		Assert.notNull(issuer, "issuer cannot be null");
+		this.allowEmpty = true;
 		this.validator = new JwtClaimValidator<>(JwtClaimNames.ISS,
-				(claimValue) -> (claimValue != null) ? issuer.equals(claimValue.toString()) : !required);
+				(claimValue) -> (claimValue != null) ? issuer.equals(claimValue.toString()) : allowEmpty);
+	}
+
+	/**
+	 * Whether to allow the {@code iss} claim to be empty. The default value is
+	 * {@code false}
+	 */
+	public void setAllowEmpty(boolean allowEmpty) {
+		this.allowEmpty = allowEmpty;
 	}
 
 	@Override

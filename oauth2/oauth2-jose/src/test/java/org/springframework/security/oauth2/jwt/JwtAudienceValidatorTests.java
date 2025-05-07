@@ -31,72 +31,50 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class JwtAudienceValidatorTests {
 
-	private final JwtAudienceValidator validatorDefault = new JwtAudienceValidator("audience");
-
-	private final JwtAudienceValidator validatorRequiredTrue = new JwtAudienceValidator("audience", true);
-
-	private final JwtAudienceValidator validatorRequiredFalse = new JwtAudienceValidator("audience", false);
+	private final JwtAudienceValidator validator = new JwtAudienceValidator("audience");
 
 	@Test
-	void givenRequiredDefaultJwtWithMatchingAudienceThenShouldValidate() {
+	void givenAllowEmptyDefaultJwtWithMatchingAudienceThenShouldValidate() {
 		Jwt jwt = TestJwts.jwt().audience(List.of("audience")).build();
-		OAuth2TokenValidatorResult result = this.validatorDefault.validate(jwt);
+		OAuth2TokenValidatorResult result = this.validator.validate(jwt);
 		assertThat(result).isEqualTo(OAuth2TokenValidatorResult.success());
 	}
 
 	@Test
-	void givenRequiredJwtWithMatchingAudienceThenShouldValidate() {
+	void givenAllowEmptyTrueJwtWithMatchingAudienceThenShouldValidate() {
 		Jwt jwt = TestJwts.jwt().audience(List.of("audience")).build();
-		OAuth2TokenValidatorResult result = this.validatorRequiredTrue.validate(jwt);
+		this.validator.setAllowEmpty(true);
+		OAuth2TokenValidatorResult result = this.validator.validate(jwt);
 		assertThat(result).isEqualTo(OAuth2TokenValidatorResult.success());
 	}
 
 	@Test
-	void givenNotRequiredJwtWithMatchingAudienceThenShouldValidate() {
-		Jwt jwt = TestJwts.jwt().audience(List.of("audience")).build();
-		OAuth2TokenValidatorResult result = this.validatorRequiredFalse.validate(jwt);
-		assertThat(result).isEqualTo(OAuth2TokenValidatorResult.success());
-	}
-
-	@Test
-	void givenRequiredDefaultJwtWithoutMatchingAudienceThenShouldValidate() {
+	void givenAllowEmptyDefaultJwtWithoutMatchingAudienceThenShouldValidate() {
 		Jwt jwt = TestJwts.jwt().audience(List.of("other")).build();
-		OAuth2TokenValidatorResult result = this.validatorDefault.validate(jwt);
+		OAuth2TokenValidatorResult result = this.validator.validate(jwt);
 		assertThat(result.hasErrors()).isTrue();
 	}
 
 	@Test
-	void givenRequiredJwtWithoutMatchingAudienceThenShouldValidate() {
+	void givenAllowEmptyJwtWithoutMatchingAudienceThenShouldValidate() {
 		Jwt jwt = TestJwts.jwt().audience(List.of("other")).build();
-		OAuth2TokenValidatorResult result = this.validatorRequiredTrue.validate(jwt);
+		this.validator.setAllowEmpty(true);
+		OAuth2TokenValidatorResult result = this.validator.validate(jwt);
 		assertThat(result.hasErrors()).isTrue();
 	}
 
 	@Test
-	void givenNotRequiredJwtWithoutMatchingAudienceThenShouldValidate() {
-		Jwt jwt = TestJwts.jwt().audience(List.of("other")).build();
-		OAuth2TokenValidatorResult result = this.validatorRequiredFalse.validate(jwt);
-		assertThat(result.hasErrors()).isTrue();
-	}
-
-	@Test
-	void givenRequiredDefaultJwtWithoutAudienceThenShouldValidate() {
+	void givenAllowEmptyDefaultJwtWithoutAudienceThenShouldValidate() {
 		Jwt jwt = TestJwts.jwt().audience(null).build();
-		OAuth2TokenValidatorResult result = this.validatorDefault.validate(jwt);
+		OAuth2TokenValidatorResult result = this.validator.validate(jwt);
 		assertThat(result.hasErrors()).isTrue();
 	}
 
 	@Test
-	void givenRequiredJwtWithoutAudienceThenShouldValidate() {
+	void givenAllowEmptyTrueJwtWithoutAudienceThenShouldValidate() {
 		Jwt jwt = TestJwts.jwt().audience(null).build();
-		OAuth2TokenValidatorResult result = this.validatorRequiredTrue.validate(jwt);
-		assertThat(result.hasErrors()).isTrue();
-	}
-
-	@Test
-	void givenNotRequiredJwtWithoutAudienceThenShouldValidate() {
-		Jwt jwt = TestJwts.jwt().audience(null).build();
-		OAuth2TokenValidatorResult result = this.validatorRequiredFalse.validate(jwt);
+		this.validator.setAllowEmpty(true);
+		OAuth2TokenValidatorResult result = this.validator.validate(jwt);
 		assertThat(result.hasErrors()).isFalse();
 	}
 

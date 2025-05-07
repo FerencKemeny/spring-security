@@ -34,132 +34,94 @@ public class JwtIssuerValidatorTests {
 
 	private static final String ISSUER = "https://issuer";
 
-	private final JwtIssuerValidator validatorDefault = new JwtIssuerValidator(ISSUER);
-
-	private final JwtIssuerValidator validatorRequiredTrue = new JwtIssuerValidator(ISSUER, true);
-
-	private final JwtIssuerValidator validatorRequiredFalse = new JwtIssuerValidator(ISSUER, false);
+	private final JwtIssuerValidator validator = new JwtIssuerValidator(ISSUER);
 
 	@Test
-	public void validateWhenRequiredDefaultAndIssuerMatchesThenReturnsSuccess() {
+	public void validateWhenAllowEmptyDefaultAndIssuerMatchesThenReturnsSuccess() {
 		Jwt jwt = TestJwts.jwt().claim("iss", ISSUER).build();
 		// @formatter:off
-		assertThat(this.validatorDefault.validate(jwt))
+		assertThat(this.validator.validate(jwt))
 				.isEqualTo(OAuth2TokenValidatorResult.success());
 		// @formatter:on
 	}
 
 	@Test
-	public void validateWhenRequiredAndIssuerMatchesThenReturnsSuccess() {
+	public void validateWhenAllowEmptyFalseAndIssuerMatchesThenReturnsSuccess() {
 		Jwt jwt = TestJwts.jwt().claim("iss", ISSUER).build();
 		// @formatter:off
-		assertThat(this.validatorRequiredTrue.validate(jwt))
+		this.validator.setAllowEmpty(false);
+		assertThat(this.validator.validate(jwt))
 				.isEqualTo(OAuth2TokenValidatorResult.success());
 		// @formatter:on
 	}
 
 	@Test
-	public void validateWhenNotRequiredAndIssuerMatchesThenReturnsSuccess() {
-		Jwt jwt = TestJwts.jwt().claim("iss", ISSUER).build();
-		// @formatter:off
-		assertThat(this.validatorRequiredFalse.validate(jwt))
-				.isEqualTo(OAuth2TokenValidatorResult.success());
-		// @formatter:on
-	}
-
-	@Test
-	public void validateWhenRequiredDefaultAndIssuerUrlMatchesThenReturnsSuccess() throws MalformedURLException {
+	public void validateWhenAllowEmptyDefaultAndIssuerUrlMatchesThenReturnsSuccess() throws MalformedURLException {
 		Jwt jwt = TestJwts.jwt().claim("iss", new URL(ISSUER)).build();
 
-		assertThat(this.validatorDefault.validate(jwt)).isEqualTo(OAuth2TokenValidatorResult.success());
+		assertThat(this.validator.validate(jwt)).isEqualTo(OAuth2TokenValidatorResult.success());
 	}
 
 	@Test
-	public void validateWhenRequiredAndIssuerUrlMatchesThenReturnsSuccess() throws MalformedURLException {
+	public void validateWhenAllowEmptyFalseAndIssuerUrlMatchesThenReturnsSuccess() throws MalformedURLException {
 		Jwt jwt = TestJwts.jwt().claim("iss", new URL(ISSUER)).build();
 
-		assertThat(this.validatorRequiredTrue.validate(jwt)).isEqualTo(OAuth2TokenValidatorResult.success());
+		this.validator.setAllowEmpty(false);
+		assertThat(this.validator.validate(jwt)).isEqualTo(OAuth2TokenValidatorResult.success());
 	}
 
 	@Test
-	public void validateWhenNotRequiredAndIssuerUrlMatchesThenReturnsSuccess() throws MalformedURLException {
-		Jwt jwt = TestJwts.jwt().claim("iss", new URL(ISSUER)).build();
-
-		assertThat(this.validatorRequiredFalse.validate(jwt)).isEqualTo(OAuth2TokenValidatorResult.success());
-	}
-
-	@Test
-	public void validateWhenRequiredDefaultAndIssuerMismatchesThenReturnsError() {
+	public void validateWhenAllowEmptyDefaultAndIssuerMismatchesThenReturnsError() {
 		Jwt jwt = TestJwts.jwt().claim(JwtClaimNames.ISS, "https://other").build();
-		OAuth2TokenValidatorResult result = this.validatorDefault.validate(jwt);
+		OAuth2TokenValidatorResult result = this.validator.validate(jwt);
 		assertThat(result.getErrors()).isNotEmpty();
 	}
 
 	@Test
-	public void validateWhenRequiredAndIssuerMismatchesThenReturnsError() {
+	public void validateWhenAllowEmptyFalseAndIssuerMismatchesThenReturnsError() {
 		Jwt jwt = TestJwts.jwt().claim(JwtClaimNames.ISS, "https://other").build();
-		OAuth2TokenValidatorResult result = this.validatorRequiredTrue.validate(jwt);
+		this.validator.setAllowEmpty(false);
+		OAuth2TokenValidatorResult result = this.validator.validate(jwt);
 		assertThat(result.getErrors()).isNotEmpty();
 	}
 
 	@Test
-	public void validateWhenNotRequiredAndIssuerMismatchesThenReturnsError() {
-		Jwt jwt = TestJwts.jwt().claim(JwtClaimNames.ISS, "https://other").build();
-		OAuth2TokenValidatorResult result = this.validatorRequiredFalse.validate(jwt);
-		assertThat(result.getErrors()).isNotEmpty();
-	}
-
-	@Test
-	public void validateWhenRequiredDefaultAndIssuerUrlMismatchesThenReturnsError() throws MalformedURLException {
+	public void validateWhenAllowEmptyDefaultAndIssuerUrlMismatchesThenReturnsError() throws MalformedURLException {
 		Jwt jwt = TestJwts.jwt().claim(JwtClaimNames.ISS, new URL("https://other")).build();
 
-		OAuth2TokenValidatorResult result = this.validatorDefault.validate(jwt);
+		OAuth2TokenValidatorResult result = this.validator.validate(jwt);
 
 		assertThat(result.getErrors()).isNotEmpty();
 	}
 
 	@Test
-	public void validateWhenRequiredAndIssuerUrlMismatchesThenReturnsError() throws MalformedURLException {
+	public void validateWhenAllowEmptyFalseAndIssuerUrlMismatchesThenReturnsError() throws MalformedURLException {
 		Jwt jwt = TestJwts.jwt().claim(JwtClaimNames.ISS, new URL("https://other")).build();
 
-		OAuth2TokenValidatorResult result = this.validatorRequiredTrue.validate(jwt);
+		this.validator.setAllowEmpty(false);
+		OAuth2TokenValidatorResult result = this.validator.validate(jwt);
 
 		assertThat(result.getErrors()).isNotEmpty();
 	}
 
 	@Test
-	public void validateWhenNotRequiredAndIssuerUrlMismatchesThenReturnsError() throws MalformedURLException {
-		Jwt jwt = TestJwts.jwt().claim(JwtClaimNames.ISS, new URL("https://other")).build();
-
-		OAuth2TokenValidatorResult result = this.validatorRequiredFalse.validate(jwt);
-
-		assertThat(result.getErrors()).isNotEmpty();
-	}
-
-	@Test
-	public void validateWhenRequiredDefaultAndJwtHasNoIssuerThenReturnsError() {
+	public void validateWhenAllowEmptyDefaultAndJwtHasNoIssuerThenReturnsError() {
 		Jwt jwt = TestJwts.jwt().claim(JwtClaimNames.AUD, "https://aud").build();
-		OAuth2TokenValidatorResult result = this.validatorDefault.validate(jwt);
+		OAuth2TokenValidatorResult result = this.validator.validate(jwt);
 		assertThat(result.getErrors()).isNotEmpty();
 	}
 
 	@Test
-	public void validateWhenRequiredAndJwtHasNoIssuerThenReturnsError() {
+	public void validateWhenAllowEmptyFalseAndJwtHasNoIssuerThenReturnsError() {
 		Jwt jwt = TestJwts.jwt().claim(JwtClaimNames.AUD, "https://aud").build();
-		OAuth2TokenValidatorResult result = this.validatorRequiredTrue.validate(jwt);
-		assertThat(result.getErrors()).isNotEmpty();
-	}
-
-	@Test
-	public void validateWhenNotRequiredAndJwtHasNoIssuerThenReturnsError() {
-		Jwt jwt = TestJwts.jwt().claim(JwtClaimNames.AUD, "https://aud").build();
-		OAuth2TokenValidatorResult result = this.validatorRequiredFalse.validate(jwt);
+		this.validator.setAllowEmpty(false);
+		OAuth2TokenValidatorResult result = this.validator.validate(jwt);
 		assertThat(result.getErrors()).isNotEmpty();
 	}
 
 	// gh-6073
 	@Test
-	public void validateWhenRequiredDefaultAndIssuerMatchesAndIsNotAUriThenReturnsSuccess() {
+	public void validateWhenAllowEmptyDefaultAndIssuerMatchesAndIsNotAUriThenReturnsSuccess() {
 		Jwt jwt = TestJwts.jwt().claim(JwtClaimNames.ISS, "issuer").build();
 		JwtIssuerValidator validator = new JwtIssuerValidator("issuer");
 		// @formatter:off
@@ -170,20 +132,10 @@ public class JwtIssuerValidatorTests {
 
 	// gh-6073
 	@Test
-	public void validateWhenRequiredAndIssuerMatchesAndIsNotAUriThenReturnsSuccess() {
+	public void validateWhenAllowEmptyFalseAndIssuerMatchesAndIsNotAUriThenReturnsSuccess() {
 		Jwt jwt = TestJwts.jwt().claim(JwtClaimNames.ISS, "issuer").build();
-		JwtIssuerValidator validator = new JwtIssuerValidator("issuer", true);
-		// @formatter:off
-		assertThat(validator.validate(jwt))
-				.isEqualTo(OAuth2TokenValidatorResult.success());
-		// @formatter:on
-	}
-
-	// gh-6073
-	@Test
-	public void validateWhenNotRequiredAndIssuerMatchesAndIsNotAUriThenReturnsSuccess() {
-		Jwt jwt = TestJwts.jwt().claim(JwtClaimNames.ISS, "issuer").build();
-		JwtIssuerValidator validator = new JwtIssuerValidator("issuer", false);
+		JwtIssuerValidator validator = new JwtIssuerValidator("issuer");
+		validator.setAllowEmpty(false);
 		// @formatter:off
 		assertThat(validator.validate(jwt))
 				.isEqualTo(OAuth2TokenValidatorResult.success());
@@ -191,26 +143,19 @@ public class JwtIssuerValidatorTests {
 	}
 
 	@Test
-	public void validateWhenRequiredDefaultAndJwtIsNullThenThrowsIllegalArgumentException() {
+	public void validateWhenAllowEmptyDefaultAndJwtIsNullThenThrowsIllegalArgumentException() {
 		// @formatter:off
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> this.validatorDefault.validate(null));
+				.isThrownBy(() -> this.validator.validate(null));
 		// @formatter:on
 	}
 
 	@Test
-	public void validateWhenRequiredAndJwtIsNullThenThrowsIllegalArgumentException() {
+	public void validateWhenAllowEmptyFalseAndJwtIsNullThenThrowsIllegalArgumentException() {
 		// @formatter:off
+		this.validator.setAllowEmpty(false);
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> this.validatorRequiredTrue.validate(null));
-		// @formatter:on
-	}
-
-	@Test
-	public void validateWhenNotRequiredAndJwtIsNullThenThrowsIllegalArgumentException() {
-		// @formatter:off
-		assertThatIllegalArgumentException()
-				.isThrownBy(() -> this.validatorRequiredFalse.validate(null));
+				.isThrownBy(() -> this.validator.validate(null));
 		// @formatter:on
 	}
 
@@ -219,22 +164,6 @@ public class JwtIssuerValidatorTests {
 		// @formatter:off
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> new JwtIssuerValidator(null));
-		// @formatter:on
-	}
-
-	@Test
-	public void constructorWhenRequiredAndNullIssuerIsGivenThenThrowsIllegalArgumentException() {
-		// @formatter:off
-		assertThatIllegalArgumentException()
-				.isThrownBy(() -> new JwtIssuerValidator(null, true));
-		// @formatter:on
-	}
-
-	@Test
-	public void constructorWhenNotRequiredAndNullIssuerIsGivenThenThrowsIllegalArgumentException() {
-		// @formatter:off
-		assertThatIllegalArgumentException()
-				.isThrownBy(() -> new JwtIssuerValidator(null, false));
 		// @formatter:on
 	}
 

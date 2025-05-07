@@ -32,25 +32,25 @@ public final class JwtAudienceValidator implements OAuth2TokenValidator<Jwt> {
 
 	private final JwtClaimValidator<Collection<String>> validator;
 
+	private boolean allowEmpty;
+
 	/**
-	 * Constructs a {@link JwtAudienceValidator} using the provided parameters with
-	 * {@link JwtClaimNames#ISS "iss"} claim is REQUIRED
+	 * Constructs a {@link JwtAudienceValidator} using the provided parameters
 	 * @param audience - The audience that each {@link Jwt} should have.
 	 */
 	public JwtAudienceValidator(String audience) {
-		this(audience, true);
+		Assert.notNull(audience, "audience cannot be null");
+		this.allowEmpty = false;
+		this.validator = new JwtClaimValidator<>(JwtClaimNames.AUD,
+				(claimValue) -> (claimValue != null) ? claimValue.contains(audience) : allowEmpty);
 	}
 
 	/**
-	 * Constructs a {@link JwtIssuerValidator} using the provided parameters
-	 * @param audience - The audience that each {@link Jwt} should have.
-	 * @param required -{@code true} if the {@link JwtClaimNames#AUD "aud"} claim is
-	 * REQUIRED in the {@link Jwt}, {@code false} otherwise
+	 * Whether to allow the {@code aud} claim to be empty. The default value is
+	 * {@code false}
 	 */
-	public JwtAudienceValidator(String audience, boolean required) {
-		Assert.notNull(audience, "audience cannot be null");
-		this.validator = new JwtClaimValidator<>(JwtClaimNames.AUD,
-				(claimValue) -> (claimValue != null) ? claimValue.contains(audience) : !required);
+	public void setAllowEmpty(boolean allowEmpty) {
+		this.allowEmpty = allowEmpty;
 	}
 
 	@Override
